@@ -1,0 +1,107 @@
+-- Tạo database
+CREATE DATABASE IF NOT EXISTS OnlineFoodShop;
+USE OnlineFoodShop;
+
+-- 1. Danh mục
+CREATE TABLE LOAISP (
+    MALOAI INT AUTO_INCREMENT PRIMARY KEY,
+    TENLOAI VARCHAR(100) NOT NULL
+) ENGINE=InnoDB;
+
+-- 2. Users
+CREATE TABLE Users (
+    MAUSER INT AUTO_INCREMENT PRIMARY KEY,
+    TENUSER VARCHAR(50) NOT NULL,
+    MATKHAU VARCHAR(255) NOT NULL,
+    HOTEN VARCHAR(100),
+    EMAIL VARCHAR(100),
+    SDT VARCHAR(15),
+    DIACHI TEXT,
+    NGAYTAO TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    TRANGTHAI TINYINT(1) DEFAULT 1 COMMENT '1: Hoạt động, 0: Bị khóa',
+    QUYEN TINYINT(1) DEFAULT 0
+) ENGINE=InnoDB;
+
+-- 3. Sản phẩm 
+CREATE TABLE SANPHAM (
+    MASP INT AUTO_INCREMENT PRIMARY KEY,
+    TENSP VARCHAR(200) NOT NULL,
+    GIA DECIMAL(10,2) NOT NULL,
+    GIA_VON DECIMAL(10,2) DEFAULT 0,
+    SOLUONG INT DEFAULT 0,
+    IMAGE VARCHAR(255),
+    MOTA TEXT,
+    MALOAI INT
+);
+
+
+-- 4. Hóa đơn
+CREATE TABLE HOADON (
+    MAHOADON INT AUTO_INCREMENT PRIMARY KEY,
+    MAUSER INT,
+    NGAY DATETIME DEFAULT CURRENT_TIMESTAMP,
+    TONGTIEN DECIMAL(10,2),
+    TRANGTHAI VARCHAR(50) DEFAULT 'Pending'
+) ENGINE=InnoDB;
+
+-- 5. Chi tiết hóa đơn
+CREATE TABLE HOADON_CHITIET (
+    MAHDCT INT AUTO_INCREMENT PRIMARY KEY,
+    MAHOADON INT,
+    MASP INT,
+    SOLUONG INT,
+    GIA DECIMAL(10,2)
+) ENGINE=InnoDB;
+
+-- ======================
+-- KHÓA NGOẠI
+-- ======================
+
+ALTER TABLE SANPHAM
+ADD CONSTRAINT FK_SANPHAM_LOAI
+FOREIGN KEY (MALOAI) REFERENCES LOAISP(MALOAI);
+
+ALTER TABLE HOADON
+ADD CONSTRAINT FK_HOADON_USER
+FOREIGN KEY (MAUSER) REFERENCES Users(MAUSER);
+
+ALTER TABLE HOADON_CHITIET
+ADD CONSTRAINT FK_HDCT_HD
+FOREIGN KEY (MAHOADON) REFERENCES HOADON(MAHOADON),
+ADD CONSTRAINT FK_HDCT_SP
+FOREIGN KEY (MASP) REFERENCES SANPHAM(MASP);
+
+INSERT INTO LOAISP (TENLOAI) VALUES
+('Đồ ăn nhanh'),
+('Nước uống'),
+('Món chính'),
+('Ăn vặt'),
+('Tráng miệng');
+
+INSERT INTO Users (TENUSER, MATKHAU, HOTEN, EMAIL, SDT, DIACHI, QUYEN, TRANGTHAI) VALUES
+('admin', MD5('123456'), 'Quản trị viên', 'admin@gmail.com', '0900000001', 'Hà Nội', 1, 1),
+('user1', MD5('123456'), 'Nguyễn Văn A', 'user1@gmail.com', '0900000002', 'TP.HCM', 0, 1),
+('user2', MD5('123456'), 'Trần Thị B', 'user2@gmail.com', '0900000003', 'Đà Nẵng', 0, 1),
+('user3', MD5('123456'), 'Lê Văn C', 'user3@gmail.com', '0900000004', 'Cần Thơ', 0, 1),
+('user4', MD5('123456'), 'Phạm Thị D', 'user4@gmail.com', '0900000005', 'Hải Phòng', 0, 0);
+
+INSERT INTO SANPHAM (TENSP, GIA, GIA_VON, SOLUONG, IMAGE, MOTA, MALOAI) VALUES
+('Gà rán', 50000, 30000, 10, 'ga_ran.jpg', 'Gà rán giòn ngon', 1),
+('Trà sữa', 30000, 15000, 20, 'tra_sua.jpg', 'Trà sữa trân châu', 2),
+('Cơm sườn', 60000, 40000, 8, 'com_suon.jpg', 'Cơm sườn nướng', 3),
+('Khoai tây chiên', 25000, 10000, 15, 'khoai_tay.jpg', 'Khoai chiên giòn', 4),
+('Bánh flan', 20000, 8000, 25, 'banh_flan.jpg', 'Bánh flan mềm mịn', 5);
+
+INSERT INTO HOADON (MAUSER, TONGTIEN, TRANGTHAI) VALUES
+(2, 80000, 'Pending'),
+(3, 60000, 'Completed'),
+(2, 50000, 'Processing'),
+(4, 25000, 'Cancelled'),
+(5, 20000, 'Pending');
+
+INSERT INTO HOADON_CHITIET (MAHOADON, MASP, SOLUONG, GIA) VALUES
+(1, 1, 1, 50000),
+(1, 2, 1, 30000),
+(2, 3, 1, 60000),
+(3, 1, 1, 50000),
+(4, 4, 1, 25000);
